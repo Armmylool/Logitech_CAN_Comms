@@ -1,6 +1,5 @@
 #include <G29.h>
 
-
 SDL_Joystick *joystick = NULL;
 
 void SDL_Begin() {
