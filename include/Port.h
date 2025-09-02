@@ -18,3 +18,5 @@ boolean CAN_Begin(int bitrate) ;
  *  @param data 8 byte data
 */
 boolean CAN_Write(const char *addr, const char *data) ;
+
+boolean CAN_Write_integer(const char* addr, uint8_t* packet_buffer) ;

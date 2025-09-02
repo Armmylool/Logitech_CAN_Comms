@@ -79,6 +79,16 @@ boolean CAN_Write(const char *addr, const char *data) {
     if (!WriteFile(hSerial, writeBuffer, strlen(writeBuffer), &bytesWritten, NULL)) {
         return FALSE;
     }
-    printf("CAN writed successfully!\n") ;
-    return TRUE ;
+    else {
+        printf("CAN writed successfully!\n") ;
+        return TRUE ;
+    }
+}
+
+boolean CAN_Write_integer(const char* addr, uint8_t* packet_buffer) {
+    char data_as_string[9];
+    for (int i = 0; i < 4; i++) {
+        sprintf(&data_as_string[i * 2], "%02X", packet_buffer[i]);
+    }
+    return CAN_Write(addr, data_as_string);
 }
