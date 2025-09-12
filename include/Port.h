@@ -2,10 +2,17 @@
 #include <stdio.h>
 #include <windows.h>
 
+extern HANDLE hSerial ;
+extern char writeBuffer[64] ; 
+extern DWORD bytesWritten, bytesRead;
+
 /**
  * @brief  Serial Port Begin  @param Port Port of USB  @param baudrate Baudrate of USB(bps)  @param byte_size byte setting of USB
  * @param parity ODD or EVEN or NONE @param stop_bits Stop bit setting of USB */
 HANDLE Serial_Begin(const char *Port, uint32_t baudrate, uint8_t byte_size, uint8_t parity, uint8_t stop_bits) ;
+
+/** @brief Serial Port Write Command.*/
+void Serial_Write(HANDLE hSerial, uint8_t *data, size_t length) ;
 
 /** @brief  CAN Setting and Start
  *  @param bitrate  bitrate of CAN device or BUS
@@ -19,4 +26,5 @@ boolean CAN_Begin(int bitrate) ;
 */
 boolean CAN_Write(const char *addr, const char *data) ;
 
-boolean CAN_Write_integer(const char* addr, uint8_t* packet_buffer) ;
+/** @brief Write integer Data to CAN (For change a msg for acceleration.) */
+boolean CAN_Write_integer(const char* addr, uint8_t* packet_buffer, const char* header)  ;

@@ -38,5 +38,5 @@ void receiveDataFromG29(Sint16 data) {                                     // Sc
     uint8_t wheel_buffer[4]  ; 
     SDL_Log("Steering wheel scale data : %d", scaleData);
     create_extended_packet(scaleData, wheel_buffer) ;
-    CAN_Write_integer(wheel_address, wheel_buffer) ;
+    CAN_Write_integer(wheel_address, wheel_buffer,wheel_comms.POSITION) ;
 }

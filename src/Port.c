@@ -4,9 +4,7 @@
 #define CAN_RATE_500K 500000
 #define CAN_RATE_1M   1000000
 
-HANDLE hSerial ;
-char writeBuffer[64] ; 
-DWORD bytesWritten, bytesRead;
+
 
 HANDLE Serial_Begin(const char *Port, uint32_t baudrate, uint8_t byte_size, uint8_t parity, uint8_t stop_bits) {
      hSerial = CreateFile(Port, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_FLAG_NO_BUFFERING, NULL);
@@ -48,6 +46,15 @@ HANDLE Serial_Begin(const char *Port, uint32_t baudrate, uint8_t byte_size, uint
     return hSerial;
 }
 
+void Serial_Write(HANDLE hSerial, uint8_t *data, size_t length) {
+    if (!WriteFile(hSerial, data, length, &bytesWritten, NULL)) {
+        printf("Error writing to serial port. Error Code: %d\n", GetLastError());
+    } else {
+        printf("Sent %ld bytes to serial port.\n", bytesWritten);
+    }
+}
+
+
 boolean CAN_Begin(int bitrate) {
     switch (bitrate) {
         case CAN_RATE_500K :
@@ -85,10 +92,13 @@ boolean CAN_Write(const char *addr, const char *data) {
     }
 }
 
-boolean CAN_Write_integer(const char* addr, uint8_t* packet_buffer) {
+boolean CAN_Write_integer(const char* addr, uint8_t* packet_buffer, const char* header) {
     char data_as_string[9];
     for (int i = 0; i < 4; i++) {
         sprintf(&data_as_string[i * 2], "%02X", packet_buffer[i]);
     }
-    return CAN_Write(addr, data_as_string);
+     char completeMsg[strlen(header) + 9] ;
+    strcpy(completeMsg, header); // คัดลอก header ("230D2003") มาใส่ก่อน
+    strcat(completeMsg, data_as_string); // นำ data ("B9B0FFFF") มาต่อท้าย 
+    return CAN_Write(addr, completeMsg) ;
 }

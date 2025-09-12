@@ -1,7 +1,13 @@
 #include <stdio.h>
+#include <windows.h>
 #include "Port.h"
 #include "G29.h"
 #include "steering.h"
+#include "brake.h"
+
+HANDLE hSerial = NULL;
+char writeBuffer[64];
+DWORD bytesWritten, bytesRead;
 
 #define CAN_RATE_1M   1000000
 boolean joystickReady = FALSE;
@@ -20,7 +26,7 @@ int getData_G29(void* data)  ;
 
 int main(int argc, char *argv[]) {
 //----------------------------------------- Initialize --------------------------------------//
-    Serial_Begin("\\\\.\\COM11", 115200, 8, NOPARITY, 1) ;
+    Serial_Begin("\\\\.\\COM5", 115200, 8, NOPARITY, 1) ;
     CAN_Begin(CAN_RATE_1M) ;
     enableWheel() ;
     SDL_Begin() ;
@@ -49,20 +55,37 @@ int getData_G29(void* data) {
                     joystickReady = TRUE ;                                                                                                                                             // Enter pin on logitech to start a program
                 }   
             }
-        }
+        //     if (joystickReady == TRUE) {                                                                                                                                           // Read only Event occurs.
+        //          if (event.type == SDL_JOYAXISMOTION) {
+        //             uint8_t axis = event.jaxis.axis;
+        //             int16_t value = event.jaxis.value;
+        //             if (axis == 1) { // Throttle Axis
+        //                 printf("Throttle Accelerate to %d\n", value) ;
+        //             }
+        //             else if (axis == 0) {
+        //                 printf("Wheel to %d\n", value) ;
+        //                 receiveDataFromG29(value) ;
+        //             }
+        //             else if (axis == 2) { // Brake Axis
+        //                 // uint16_t value_cali_brake = 800 - (((int32_t)value + 32768) * 800 / 65535);
+        //                 printf("Brake moved to %d\n", value) ;
+        //             }
+        //     }
+        // }
         if (joystickReady == TRUE) {
             SDL_JoystickUpdate() ;
             SDL_LockMutex(state_mutex);
             G29_val.steering = SDL_JoystickGetAxis(joystick, 0); 
             G29_val.accelerator = SDL_JoystickGetAxis(joystick, 1); 
             G29_val.brake = SDL_JoystickGetAxis(joystick, 2); 
-            receiveDataFromG29(G29_val.steering) ;
+            // receiveDataFromG29(G29_val.steering) ;
+            process_data(G29_val.brake) ;
             SDL_UnlockMutex(state_mutex);
             SDL_Delay(1) ;
         }
+        }
     }
 }
-
 Uint32 SDLCALL can_sender_callback(Uint32 interval, void *param) {
     const unsigned int CAN_ID_G29 = 0x100;
     val local_state_to_send;
